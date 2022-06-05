@@ -1,7 +1,10 @@
-import React from 'react'
+import React from 'react';
+import UserList from './UserList';
 
 export default function Users() {
   return (
-    <div>Users</div>
+    <main className="users-page">
+      <UserList/>
+    </main>
   )
 }

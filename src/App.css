@@ -3,7 +3,7 @@
   --primary: #34421e;
   --button-bg:  #495733;
   --error: #ed553b;
-  --secondary: #62f062;
+  --secondary: #c19434;
   --dark-text: #444;
   --light-text: #fff;
 }
@@ -150,4 +150,51 @@ main {
 .items-list-nav .selected .btn {
   background: var(--primary);
   color: var(--light-text);
+}
+
+.item {
+  background: var(--secondary);
+  color: var(--light-text);
+  padding: 2rem;
+  text-align: left;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--primary);
+  border-bottom: 8px solid white;
+  margin: -2rem -2rem 1rem;
+  padding: 0 1rem;
+}
+
+.item-header .controls {
+  font-weight: normal;
+}
+
+.item h3 {
+  border-bottom: 1px solid white;
+  margin: 1em 0 0.5em;
+  padding-bottom: 3px;
+}
+
+.bookable-availability {
+  display: flex;
+  padding: 0 1em;
+}
+
+.bookable-availability ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 40%;
+}
+
+.bookable-availability li {
+  margin: 0.4em 0;
+}
+
+.item-details .bookable-availability ul {
+  list-style: square;
 }
