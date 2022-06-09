@@ -1,5 +1,6 @@
-import {useState, useEffect, useReducer} from 'react';
+import {useState, useEffect, useReducer, useRef} from 'react';
 import {FaArrowRight} from 'react-icons/fa';
+import Spinner from '../../customComponents/Spinner';
 import reducer from "./reducer";
 import getData from '../../../utils/api';
 import staticData from '../../../data/static.json';
@@ -10,16 +11,27 @@ const initialState = {
   hasDetails: true,
   bookables: [],
   isLoading: true,
-  error: false
+  error: false,
+  isPresenting: false
 };
 
 export default function BookablesList () {
   
-  const [{ group, bookableIndex, hasDetails, bookables, isLoading, error}, dispatch] = useReducer(reducer, initialState);
+  const [{ group, bookableIndex, hasDetails, bookables, isLoading, error, isPresenting}, dispatch] = useReducer(reducer, initialState);
   const bookablesInGroup = bookables.filter(b => b.group === group);
   const bookable = bookablesInGroup[bookableIndex];
   const groups = [...new Set(bookables.map(b => b.group))]; // set of the unique group names
-  
+  const timerRef = useRef(null);
+  const nextButtonRef = useRef(); 
+
+  useEffect(() => {
+    if(isPresenting) {
+      scheduleNext();
+    }
+    else {
+      clearNextTimeout();
+    }
+  });
   useEffect(() => { 
  
     dispatch({type: "FETCH_BOOKABLES_REQUEST"});                      
@@ -39,6 +51,11 @@ export default function BookablesList () {
       type: "SET_GROUP",
       payload: event.target.value
     });
+
+    if(isPresenting) {
+      clearNextTimeout();
+      scheduleNext();
+    }
   }
 
   function changeBookable (selectedIndex) {
@@ -46,16 +63,40 @@ export default function BookablesList () {
       type: "SET_BOOKABLE",
       payload: selectedIndex
     });
+    nextButtonRef.current.focus(); 
   }
 
   function nextBookable () {
-    dispatch({ type : "NEXT_BOOKABLE"});
+    dispatch({ type : "NEXT_BOOKABLE",  payload: false });
   }
 
   function toggleDetails () {
     dispatch({
       type: "TOGGLE_HAS_DETAILS"
     });
+  }
+
+  function scheduleNext () {
+    if (timerRef.current === null) {       
+      timerRef.current = setTimeout(() => { 
+         timerRef.current = null;         
+         dispatch({ 
+           type: "NEXT_BOOKABLE",           
+            payload: true });}, 3000);     
+    }   
+  }
+
+  function clearNextTimeout () {
+    clearTimeout(timerRef.current);
+    timerRef.current = null;
+  }
+
+  if (error) {
+    return <p>{error.message}</p>
+  }
+
+  if (isLoading) {
+    return <p><Spinner/> Loading bookables...</p>
   }
   return (
     <>
@@ -79,7 +120,7 @@ export default function BookablesList () {
         ))}
       </ul>
       <p>
-        <button className="btn" onClick={nextBookable} autoFocus>
+        <button className="btn" onClick={nextBookable}  ref={nextButtonRef}  autoFocus>
           <FaArrowRight/>
           <span>Next</span>
         </button>
