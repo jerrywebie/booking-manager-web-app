@@ -1,23 +1,38 @@
-import {useState, useReducer} from 'react';
+import {useState, useEffect, useReducer} from 'react';
 import {FaArrowRight} from 'react-icons/fa';
 import reducer from "./reducer";
-import data from '../../../data/static.json';
+import getData from '../../../utils/api';
+import staticData from '../../../data/static.json';
 
 const initialState = {
   group: "Rooms",
   bookableIndex: 0,
   hasDetails: true,
-  data,
+  bookables: [],
+  isLoading: true,
+  error: false
 };
 
 export default function BookablesList () {
   
-  const [{ group, bookableIndex, hasDetails, data}, dispatch] = useReducer(reducer, initialState);
-  const bookablesInGroup = data.bookables.filter(b => b.group === group);
+  const [{ group, bookableIndex, hasDetails, bookables, isLoading, error}, dispatch] = useReducer(reducer, initialState);
+  const bookablesInGroup = bookables.filter(b => b.group === group);
   const bookable = bookablesInGroup[bookableIndex];
-  const groups = [...new Set(data.bookables.map(b => b.group))]; // set of the unique group names
+  const groups = [...new Set(bookables.map(b => b.group))]; // set of the unique group names
   
+  useEffect(() => { 
  
+    dispatch({type: "FETCH_BOOKABLES_REQUEST"});                      
+ 
+    getData("http://localhost:3001/bookables")                          
+ 
+      .then(bookables => dispatch({
+        type: "FETCH_BOOKABLES_SUCCESS",                               
+        payload: bookables})) 
+      .catch(error => dispatch({                                                
+        type: "FETCH_BOOKABLES_ERROR",
+        payload: error})); 
+  }, []); 
   
   function changeGroup (event) {
     dispatch({
@@ -98,12 +113,12 @@ export default function BookablesList () {
                   <ul>
                     {bookable.days
                       .sort()
-                      .map(d => <li key={d}>{data.days[d]}</li>)
+                      .map(d => <li key={d}>{staticData.days[d]}</li>)
                     }
                   </ul>
                   <ul>
                     {bookable.sessions
-                      .map(s => <li key={s}>{data.sessions[s]}</li>)
+                      .map(s => <li key={s}>{staticData.sessions[s]}</li>)
                     }
                   </ul>
                 </div>

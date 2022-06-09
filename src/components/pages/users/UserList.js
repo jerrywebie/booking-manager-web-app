@@ -1,14 +1,42 @@
-import React, {useState} from 'react';
-import data from '../../../data/static.json';
+import React, {useState, useEffect} from 'react';
+import Spinner from '../../customComponents/Spinner';
+import getData from '../../../utils/api';
+
 
 
 export default function UserList() {
+
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [users, setUsers] = useState(null);
     const [userIndex, setUserIndex] = useState(0);
-    const user = data.users[userIndex];
+    const user = users?.[userIndex];
+
+    useEffect(() => {
+      getData("http://localhost:3001/users")
+        .then(data => {
+          setUsers(data);
+          setIsLoading(false); // the data has finished loading
+        })
+        .catch(error => {
+          setError(error); // set the error object
+          setIsLoading(false); // we're no longer loading
+        });
+    }, []);
+
+    if (error) {
+      return <p>{error.message}</p>
+    }
+
+    if (isLoading) {
+      return <p><Spinner/> Loading users...</p>
+    }
+
   return (
     <>
       <ul className="users items-list-nav">
-        {data.users.map((u, i) => (
+        {users.map((u, i) => (
           <li key={u.id} className={i === userIndex ? "selected" : null}>
             <button className="btn" onClick={() => setUserIndex(i)}>{u.name}</button>
           </li>
